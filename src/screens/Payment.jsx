@@ -7,18 +7,17 @@ export default function Payment() {
 
   const handlePayment = (e) => {
     e.preventDefault();
-    alert("Payment Successful! Your appointment is booked.");
     
-    // Create mock new appointment data based on the app's context
     const newAppointment = {
       id: `VFS-${Math.floor(Math.random() * 9000) + 1000}`,
       name: 'TUSHAR DESAI',
       type: 'Short Term Visa',
-      status: 'Approved',
+      status: 'Paid',
       date: '15 Jul, 2026',
       time: '10:30 AM'
     };
 
+    alert("Payment Successful! Your appointment is booked.");
     navigate('/dashboard', { state: { newAppointment } });
   };
 

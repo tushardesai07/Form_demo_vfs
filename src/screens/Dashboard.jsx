@@ -11,19 +11,16 @@ export default function Dashboard() {
   ]);
 
   useEffect(() => {
-    if (location.state?.newAppointment) {
+    if (location.state && location.state.newAppointment) {
       setResponses(prev => {
-        // Prevent duplicate addition on re-renders
-        if (!prev.find(r => r.id === location.state.newAppointment.id)) {
-          return [location.state.newAppointment, ...prev];
-        }
-        return prev;
+        const exists = prev.find(r => r.id === location.state.newAppointment.id);
+        if (exists) return prev;
+        return [location.state.newAppointment, ...prev];
       });
-      
-      // Clear state so it doesn't re-add if user refreshes
+      // Clear location state to prevent duplicates on refresh
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+  }, [location]);
 
   const handleAddResponse = () => {
     navigate('/appointment');
@@ -58,14 +55,7 @@ export default function Dashboard() {
               New Application
             </button>
             <div className="user-profile">
-              <div 
-                className="avatar" 
-                title="Sign out"
-                onClick={() => navigate('/login')} 
-                style={{ cursor: 'pointer' }}
-              >
-                TD
-              </div>
+              <div className="avatar">TD</div>
             </div>
           </div>
         </header>
