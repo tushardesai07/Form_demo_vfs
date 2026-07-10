@@ -8,8 +8,18 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
-    navigate('/dashboard');
+    const storedEmail = localStorage.getItem('userEmail');
+    const storedPassword = localStorage.getItem('userPassword');
+
+    if (email === 'ranjan.ar855@gamil.com' && password === 'visahub@3210') {
+      console.log('Admin login successful');
+      navigate('/dashboard');
+    } else if (storedEmail && email === storedEmail && password === storedPassword) {
+      console.log('User login successful');
+      navigate('/dashboard');
+    } else {
+      alert('Invalid credentials. Please try again.');
+    }
   };
 
   return (

@@ -1,14 +1,17 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Sign up attempt:', { name, email, password });
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userPassword', password);
+    alert('Account created successfully! You can now log in.');
+    navigate('/login');
   };
 
   return (
