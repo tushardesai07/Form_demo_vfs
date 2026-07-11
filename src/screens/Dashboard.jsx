@@ -4,11 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [responses, setResponses] = useState([
-    { id: 'VFS-2983', name: 'John Doe', type: 'Schengen Visa', status: 'Approved', date: '25 Oct, 2026', time: '10:30 AM' },
-    { id: 'VFS-4012', name: 'Jane Smith', type: 'National Visa', status: 'Pending', date: '26 Oct, 2026', time: '02:15 PM' },
-    { id: 'VFS-1092', name: 'Robert Chen', type: 'Airport Transit', status: 'Reviewing', date: '28 Oct, 2026', time: '09:00 AM' },
-  ]);
+  const [responses, setResponses] = useState([]);
 
   useEffect(() => {
     if (location.state && location.state.newAppointment) {
@@ -25,6 +21,10 @@ export default function Dashboard() {
   const handleAddResponse = () => {
     navigate('/appointment');
   };
+
+  const totalApplications = responses.length;
+  const approvedVisas = responses.filter(r => r.status === 'Approved').length;
+  const pendingReview = responses.filter(r => ['Pending', 'Reviewing'].includes(r.status)).length;
 
   return (
     <div className="premium-dashboard">
@@ -69,8 +69,7 @@ export default function Dashboard() {
             <div className="metric-details">
               <h3>Total Applications</h3>
               <div className="metric-value">
-                <span className="number">1,248</span>
-                <span className="trend positive">+12% from last month</span>
+                <span className="number">{totalApplications}</span>
               </div>
             </div>
           </div>
@@ -82,8 +81,7 @@ export default function Dashboard() {
             <div className="metric-details">
               <h3>Approved Visas</h3>
               <div className="metric-value">
-                <span className="number">842</span>
-                <span className="trend positive">+5% from last month</span>
+                <span className="number">{approvedVisas}</span>
               </div>
             </div>
           </div>
@@ -95,8 +93,7 @@ export default function Dashboard() {
             <div className="metric-details">
               <h3>Pending Review</h3>
               <div className="metric-value">
-                <span className="number">56</span>
-                <span className="trend negative">-2% from last week</span>
+                <span className="number">{pendingReview}</span>
               </div>
             </div>
           </div>
