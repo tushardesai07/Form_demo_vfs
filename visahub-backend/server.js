@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -11,20 +10,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Database connection
-const db = mysql.createConnection({
-  host: process.env.DB_HOST ,
-  user: process.env.DB_USER ,
+// Database connection pool
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
     return;
   }
-  console.log('Connected to MySQL Database');
+  console.log('Connected to MySQL Database Pool');
+  connection.release();
 });
 
 // Middleware to authenticate JWT tokens
@@ -41,6 +44,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Health Check Route - Test this in browser first!
+app.get('/api/health', (req, res) => {
+  db.query('SELECT 1', (err) => {
+    if (err) return res.status(500).json({ status: 'DB Error', error: err.message });
+    res.json({ status: 'OK', message: 'Server and Database are connected!' });
+  });
+});
+
 // --- API ROUTES ---
 
 // 1. User Registration (SignUp)
@@ -48,11 +59,9 @@ app.post('/api/auth/register', async (req, res) => {
   const { name, email, password } = req.body;
   
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // By default, new registrations are 'user' role
     const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
     
-    db.query(sql, [name, email, hashedPassword, 'user'], (err, result) => {
+    db.query(sql, [name, email, password, 'user'], (err, result) => {
       if (err) {
         if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: 'Email already exists' });
         return res.status(500).json({ error: err.message });
@@ -74,7 +83,9 @@ app.post('/api/auth/login', (req, res) => {
     if (results.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
     const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password);
+    
+    // Comparing plain text passwords
+    const isMatch = (password === user.password);
     
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
@@ -89,48 +100,6 @@ app.post('/api/auth/login', (req, res) => {
       message: `${user.role === 'admin' ? 'Admin' : 'User'} login successful`, 
       token, 
       user: { id: user.id, name: user.name, email: user.email, role: user.role } 
-    });
-  });
-});
-
-// 3. Save Entire Appointment Flow (Details + Applicants + Booking Time)
-app.post('/api/appointments/submit', authenticateToken, (req, res) => {
-  const { appointmentDetails, applicants, bookingData } = req.body;
-  const userId = req.user.id;
-
-  // Start a MySQL transaction
-  db.beginTransaction(err => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    // 1. Insert Appointment
-    const apptSql = 'INSERT INTO appointments (user_id, centre, category, sub_category) VALUES (?, ?, ?, ?)';
-    db.query(apptSql, [userId, appointmentDetails.centre, appointmentDetails.category, appointmentDetails.subCategory], (err, apptResult) => {
-      if (err) return db.rollback(() => res.status(500).json({ error: err.message }));
-      
-      const appointmentId = apptResult.insertId;
-
-      // 2. Insert all Applicants
-      const applicantSql = `INSERT INTO applicants (appointment_id, first_name, last_name, gender, dob, nationality, passport_number, passport_expiry, phone_code, phone_number, email, address_line_1, address_line_2, state, city, postcode) VALUES ?`;
-      
-      const applicantValues = applicants.map(app => [
-        appointmentId, app.firstName, app.lastName, app.gender, app.dob, app.nationality, app.passport_number, app.passport_expiry, app.phone_code, app.phone_number, app.email, app.address_line_1, app.address_line_2, app.state, app.city, app.postcode
-      ]);
-
-      db.query(applicantSql, [applicantValues], (err, applicantResult) => {
-        if (err) return db.rollback(() => res.status(500).json({ error: err.message }));
-
-        // 3. Insert Booking Date/Time
-        const bookSql = 'INSERT INTO bookings (appointment_id, selected_date, selected_time, total_amount) VALUES (?, ?, ?, ?)';
-        db.query(bookSql, [appointmentId, bookingData.date, bookingData.time, bookingData.totalAmount], (err, bookResult) => {
-          if (err) return db.rollback(() => res.status(500).json({ error: err.message }));
-
-          // Commit Transaction
-          db.commit(err => {
-            if (err) return db.rollback(() => res.status(500).json({ error: err.message }));
-            res.status(201).json({ message: 'Appointment submitted successfully', appointmentId });
-          });
-        });
-      });
     });
   });
 });
