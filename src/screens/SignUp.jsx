@@ -6,12 +6,27 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userPassword', password);
-    alert('Account created successfully! You can now log in.');
-    navigate('/login');
+    try {
+      const response = await fetch('https://visahub.atlantechglobal.com/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Account created successfully! You can now log in.');
+        navigate('/login');
+      } else {
+        alert(data.message || 'Error creating account');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Failed to connect to the server');
+    }
   };
 
   return (

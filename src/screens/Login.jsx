@@ -6,19 +6,29 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const storedEmail = localStorage.getItem('userEmail');
-    const storedPassword = localStorage.getItem('userPassword');
-
-    if (email === 'ranjan.ar855@gamil.com' && password === 'visahub@3210') {
-      console.log('Admin login successful');
-      navigate('/dashboard');
-    } else if (storedEmail && email === storedEmail && password === storedPassword) {
-      console.log('User login successful');
-      navigate('/dashboard');
-    } else {
-      alert('Invalid credentials. Please try again.');
+    try {
+      const response = await fetch('https://visahub.atlantechglobal.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userName', data.user.name);
+        console.log(`${data.user.role} login successful`);
+        navigate('/dashboard');
+      } else {
+        alert(data.message || 'Invalid credentials. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Failed to connect to the server');
     }
   };
 

@@ -5,6 +5,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [responses, setResponses] = useState([]);
+  
+  const userRole = localStorage.getItem('userRole');
+  const userName = localStorage.getItem('userName') || 'User';
 
   useEffect(() => {
     if (location.state && location.state.newAppointment) {
@@ -46,7 +49,7 @@ export default function Dashboard() {
         {/* Top Header */}
         <header className="premium-header">
           <div className="header-greeting">
-            <h1>Welcome back, Tushar</h1>
+            <h1>Welcome back, {userRole === 'admin' ? 'Admin' : userName}</h1>
             <p>Here is what's happening with your applications today.</p>
           </div>
           <div className="header-actions">
