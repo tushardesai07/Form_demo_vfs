@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function BookAppointment() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { appointmentDetails, applicants } = location.state || {};
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [visibleSlots, setVisibleSlots] = useState(5);
@@ -197,7 +199,16 @@ export default function BookAppointment() {
               className="btn-save" 
               disabled={!selectedTime}
               style={{ opacity: !selectedTime ? 0.6 : 1, cursor: !selectedTime ? 'not-allowed' : 'pointer' }}
-              onClick={() => navigate('/services')}
+              onClick={() => navigate('/services', {
+                state: {
+                  appointmentDetails,
+                  applicants,
+                  booking: {
+                    date: `${selectedDate} August 2026`,
+                    time: selectedTime
+                  }
+                }
+              })}
             >
               Continue
             </button>

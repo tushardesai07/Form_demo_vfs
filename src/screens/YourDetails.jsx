@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function YourDetails() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const appointmentDetails = location.state?.appointmentDetails || {};
   const formRef = useRef(null);
   
   const [countdown, setCountdown] = useState(44);
@@ -37,11 +39,24 @@ export default function YourDetails() {
     e.preventDefault();
     if (countdown > 0 && !isFormValid) return;
     
-    // Save current applicant
+    const formData = new FormData(e.target);
     const newApplicant = {
       id: Date.now(),
-      firstName: firstName || "TUSHAR",
-      lastName: lastName || "DESAI"
+      firstName: formData.get('firstName') || firstName,
+      lastName: formData.get('lastName') || lastName,
+      gender: formData.get('gender'),
+      dob: formData.get('dob'),
+      nationality: formData.get('nationality'),
+      passportNumber: formData.get('passportNumber'),
+      passportExpiry: formData.get('passportExpiry'),
+      phoneCode: formData.get('phoneCode'),
+      phoneNumber: formData.get('phoneNumber'),
+      email: formData.get('email'),
+      addressLine1: formData.get('addressLine1'),
+      addressLine2: formData.get('addressLine2'),
+      state: formData.get('state'),
+      city: formData.get('city'),
+      postcode: formData.get('postcode')
     };
     
     setApplicants([...applicants, newApplicant]);
@@ -70,7 +85,9 @@ export default function YourDetails() {
   };
 
   const handleFinalContinue = () => {
-    navigate('/book-appointment');
+    navigate('/book-appointment', {
+      state: { appointmentDetails, applicants }
+    });
   };
 
   const steps = [
@@ -146,6 +163,7 @@ export default function YourDetails() {
                 <label>First Name<span className="asterisk">*</span></label>
                 <input 
                   type="text" 
+                  name="firstName"
                   className="custom-input" 
                   placeholder="ENTER YOUR FIRST NAME" 
                   value={firstName}
@@ -158,6 +176,7 @@ export default function YourDetails() {
                 <label>Last Name<span className="asterisk">*</span></label>
                 <input 
                   type="text" 
+                  name="lastName"
                   className="custom-input" 
                   placeholder="PLEASE ENTER LAST NAME." 
                   value={lastName}
@@ -170,7 +189,7 @@ export default function YourDetails() {
                 <div className="form-group-app">
                   <label>Gender<span className="asterisk">*</span></label>
                   <div className="select-wrapper">
-                    <select className="custom-select" defaultValue="" required>
+                    <select name="gender" className="custom-select" defaultValue="" required>
                       <option value="" disabled>Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
@@ -182,6 +201,7 @@ export default function YourDetails() {
                   <label>Date Of Birth<span className="asterisk">*</span></label>
                   <input 
                     type="date" 
+                    name="dob"
                     className="custom-input date-input" 
                     onClick={(e) => {
                       try { e.target.showPicker() } catch (err) { /* ignore */ }
@@ -194,7 +214,7 @@ export default function YourDetails() {
               <div className="form-group-app">
                 <label>Current Nationality<span className="asterisk">*</span></label>
                 <div className="select-wrapper">
-                  <select className="custom-select" defaultValue="" required>
+                  <select name="nationality" className="custom-select" defaultValue="" required>
                     <option value="" disabled>Select</option>
                     <option value="in">India</option>
                     <option value="us">United States</option>
@@ -205,13 +225,14 @@ export default function YourDetails() {
 
               <div className="form-group-app">
                 <label>Passport Number<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER PASSPORT NUMBER" required />
+                <input type="text" name="passportNumber" className="custom-input" placeholder="ENTER PASSPORT NUMBER" required />
               </div>
 
               <div className="form-group-app">
                 <label>Passport Expiry Date<span className="asterisk">*</span></label>
                 <input 
                   type="date" 
+                  name="passportExpiry"
                   className="custom-input date-input" 
                   onClick={(e) => {
                     try { e.target.showPicker() } catch (err) { /* ignore */ }
@@ -223,39 +244,39 @@ export default function YourDetails() {
               <div className="form-group-app">
                 <label>Contact number<span className="asterisk">*</span></label>
                 <div className="contact-inputs">
-                  <input type="text" className="custom-input phone-code" placeholder="44" defaultValue="44" required />
-                  <input type="text" className="custom-input phone-number" placeholder="012345648382" required />
+                  <input type="text" name="phoneCode" className="custom-input phone-code" placeholder="44" defaultValue="44" required />
+                  <input type="text" name="phoneNumber" className="custom-input phone-number" placeholder="012345648382" required />
                 </div>
               </div>
 
               <div className="form-group-app">
                 <label>Email<span className="asterisk">*</span></label>
-                <input type="email" className="custom-input" placeholder="ENTER EMAIL ADDRESS" required />
+                <input type="email" name="email" className="custom-input" placeholder="ENTER EMAIL ADDRESS" required />
               </div>
 
               <div className="form-group-app">
                 <label>Address line 1<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER ADDRESS LINE 1" required />
+                <input type="text" name="addressLine1" className="custom-input" placeholder="ENTER ADDRESS LINE 1" required />
               </div>
 
               <div className="form-group-app">
                 <label>Address line 2<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER ADDRESS LINE 2" required />
+                <input type="text" name="addressLine2" className="custom-input" placeholder="ENTER ADDRESS LINE 2" required />
               </div>
 
               <div className="form-group-app">
                 <label>State<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER STATE NAME" required />
+                <input type="text" name="state" className="custom-input" placeholder="ENTER STATE NAME" required />
               </div>
 
               <div className="form-group-app">
                 <label>City<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER CITY NAME" required />
+                <input type="text" name="city" className="custom-input" placeholder="ENTER CITY NAME" required />
               </div>
 
               <div className="form-group-app">
                 <label>Postcode<span className="asterisk">*</span></label>
-                <input type="text" className="custom-input" placeholder="ENTER YOUR POSTCODE" required />
+                <input type="text" name="postcode" className="custom-input" placeholder="ENTER YOUR POSTCODE" required />
               </div>
 
               <div className="card-footer form-actions">

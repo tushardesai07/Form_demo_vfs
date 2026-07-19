@@ -1,9 +1,13 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Services() {
   const navigate = useNavigate();
-  const [totalAmount, setTotalAmount] = useState(2065.00);
+  const location = useLocation();
+  const { appointmentDetails, applicants = [], booking } = location.state || {};
+  
+  const baseAmount = 2065.00 * (applicants.length || 1);
+  const [totalAmount, setTotalAmount] = useState(baseAmount);
   const [addedServices, setAddedServices] = useState({});
   const [sortBy, setSortBy] = useState('popular'); // 'popular', 'lowToHigh', 'highToLow'
 
@@ -233,7 +237,15 @@ export default function Services() {
           <button
             type="button"
             className="btn-save"
-            onClick={() => navigate('/review', { state: { addedServicesList, totalAmount } })}
+            onClick={() => navigate('/review', { 
+              state: { 
+                appointmentDetails, 
+                applicants, 
+                booking, 
+                addedServicesList, 
+                totalAmount 
+              } 
+            })}
           >
             Continue
           </button>

@@ -22,7 +22,11 @@ export default function Login() {
         localStorage.setItem('userRole', data.user.role);
         localStorage.setItem('userName', data.user.name);
         console.log(`${data.user.role} login successful`);
-        navigate('/dashboard');
+        if (data.user.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         alert(data.message || 'Invalid credentials. Please try again.');
       }

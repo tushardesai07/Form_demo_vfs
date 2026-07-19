@@ -15,7 +15,11 @@ export default function AppointmentDetails() {
       return;
     }
     // Proceed to next step
-    navigate('/your-details');
+    navigate('/your-details', {
+      state: {
+        appointmentDetails: { centre, category, subCategory }
+      }
+    });
   };
 
   const steps = [
@@ -96,19 +100,33 @@ export default function AppointmentDetails() {
             <div className="select-wrapper">
               <select 
                 value={category} 
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => { setCategory(e.target.value); setSubCategory(''); }}
                 className="custom-select"
+                disabled={!centre}
               >
                 <option value="" disabled>Select your appointment category</option>
-                <option value="airport-transit">Airport transit visa (A and C)</option>
-                <option value="national-reentry">National Visa (stay of more than 90 days): Re-entry</option>
-                <option value="national-employment">National Visa (stay of more than 90 days): Employment</option>
-                <option value="national-family">National Visa (stay of more than 90 days): Family Reunion</option>
-                <option value="national-student">National Visa (stay of more than 90 days): Student Visa</option>
-                <option value="national-training">National visa (stay of more than 90 days) - Employment / training</option>
-                <option value="schengen">Schengen Visa (stay of max. 90 days or less)</option>
-                <option value="trade-fair">Trade Fair Urgent</option>
-                <option value="urgent-business">Urgent Business</option>
+                {centre === 'pune' ? (
+                  <>
+                    <option value="airport-transit">Airport transit visa (A and C)</option>
+                    <option value="national-d-stamping">National Visa (stay of more than 90 days): D-visa stamping</option>
+                    <option value="schengen">Schengen Visa (stay of max. 90 days or less)</option>
+                    <option value="trade-fair">Trade Fair Urgent</option>
+                    <option value="urgent-business">Urgent Business</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="airport-transit">Airport transit visa (A and C)</option>
+                    <option value="national-reentry">National Visa (stay of more than 90 days): Re-entry</option>
+                    <option value="national-employment">National Visa (stay of more than 90 days): Employment</option>
+                    <option value="national-family">National Visa (stay of more than 90 days): Family Reunion</option>
+                    <option value="national-student">National Visa (stay of more than 90 days): Student Visa</option>
+                    <option value="national-training">National visa (stay of more than 90 days) - Employment / training</option>
+                    <option value="national-d-stamping">National Visa (stay of more than 90 days): D-visa stamping</option>
+                    <option value="schengen">Schengen Visa (stay of max. 90 days or less)</option>
+                    <option value="trade-fair">Trade Fair Urgent</option>
+                    <option value="urgent-business">Urgent Business</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -129,6 +147,8 @@ export default function AppointmentDetails() {
                     <option value="au-pair">Au Pair</option>
                     <option value="basic-vocational">Basic or advanced in-company or school-based vocational training (§ 16a AufenthG)</option>
                     <option value="blue-card">Blue Card (§ 18g AufenthG)</option>
+                    <option value="employment-academic">Employment as an academic (§ 18b AufenthG)</option>
+                    <option value="employment-work-experience">Employment with work experience (19c AufenthG iVm 6 BeschV)</option>
                     <option value="quality-analysis">Conducting a quality analysis ((§ 16d Abs. 6 AufenthG)</option>
                     <option value="placement-agreement">Employment as part of a placement agreement (§ 16d AufenthG)</option>
                     <option value="fast-track">Fast track procedure acc to § 81a AufenthG</option>
@@ -137,8 +157,34 @@ export default function AppointmentDetails() {
                     <option value="recognition-degree">Recognition of foreign professional degree</option>
                     <option value="researcher">Researcher</option>
                   </>
+                ) : category === 'national-family' ? (
+                  <>
+                    <option value="d-family-reunion-parents">D - Family Reunion: Parents (in law)</option>
+                    <option value="d-family-reunion-spouse">D - Family Reunion: Spouse / Child</option>
+                    <option value="family-reunion-parent-other">Parent or any other family member joining a foreigner or German living in Germany</option>
+                    <option value="family-reunion-spouse-child">Spouse and / or child of foreigner living in Germany</option>
+                  </>
+                ) : category === 'national-student' ? (
+                  <>
+                    <option value="studies-aps">Studies with APS certificate</option>
+                    <option value="studies-specific">Studies with specific qualifications</option>
+                  </>
                 ) : category === 'national-reentry' ? (
                   <option value="re-entry">Re-entry</option>
+                ) : category === 'national-d-stamping' ? (
+                  <option value="d-visa-stamping">D-visa stamping</option>
+                ) : category === 'schengen' ? (
+                  <>
+                    <option value="schengen-business">Business</option>
+                    <option value="schengen-culture">Culture Sport Religious</option>
+                    <option value="schengen-health">Health</option>
+                    <option value="schengen-scientist">Scientist</option>
+                    <option value="schengen-seamen">Seamen</option>
+                    <option value="schengen-tourism">Tourism</option>
+                    <option value="schengen-trade-fair">Trade Fair</option>
+                    <option value="schengen-training">Training</option>
+                    <option value="schengen-visit">Visit (Family and Friends)</option>
+                  </>
                 ) : category === 'airport-transit' ? (
                   <option value="airport-transit">Airport transit visa (A and C)</option>
                 ) : (
@@ -150,6 +196,18 @@ export default function AppointmentDetails() {
               </select>
             </div>
           </div>
+
+          {category === 'national-family' && subCategory === 'd-family-reunion-parents' && (
+            <div className="info-banner" style={{ marginTop: '1.5rem', backgroundColor: '#e0f2fe', padding: '1.25rem', borderRadius: '8px', borderLeft: '4px solid #0284c7', fontSize: '0.875rem', color: '#0369a1', lineHeight: '1.5' }}>
+              Since 01.03.2024, family reunion is possible for parents (in law) even in cases of no exceptional hardship. This only applies if your daughter (in law) or son (in law) has received one of the following residence permits or visas for the first time on or after 01.03.2024: - EU Blue Card - (Mobile) ICT Card - Skilled worker acc. to §§ 18a, 18b, 18c III AufenthG - Scientist acc. to §§ 18d, 18f AufenthG - Senior employee, manager, company specialist, scientist, visiting scientist, engineer or technician in the research team of a visiting scientist or as a teacher acc. to § 19c I AufenthG - Employment acc. to § 19c II or IV 1 AufenthG - Self-employed acc. to § 21 AufenthG - German Residence Act Please note that this regulation does not apply to you if your son or daughter (in law) already received one of the above-mentioned residence titles before 01.03.2024! To schedule an appointment, please contact the responsible mission. Kindly contact us via e-mail. You can find...
+            </div>
+          )}
+
+          {category === 'national-d-stamping' && subCategory === 'd-visa-stamping' && (
+            <div className="info-banner" style={{ marginTop: '1.5rem', backgroundColor: '#e0f2fe', padding: '1.25rem', borderRadius: '8px', borderLeft: '4px solid #0284c7', fontSize: '0.875rem', color: '#0369a1', lineHeight: '1.5' }}>
+              We are sorry but no appointment slots are currently available. New slots open at regular intervals, please try again later
+            </div>
+          )}
         </div>
 
         <div className="card-footer form-actions">
